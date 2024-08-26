@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -9,21 +8,9 @@ import (
 )
 
 func main() {
-	file, err := os.Open("the_great_gatsby.txt")
-	if err != nil {
-		fmt.Printf("There is a problem with reading a file: %v\n", err)
-		return
-	}
-	defer file.Close()
-	read := bufio.NewReader(file)
-	text, err := io.ReadAll(read)
-	if err != nil {
-		fmt.Printf("There is a problem with reading a text: %v\n", err)
-		os.Exit(1)
-	}
-	words := strings.Fields(string(text))
+	words := HandleStdin()
 	if len(words) == 0 {
-		fmt.Println("Text is empty!")
+		fmt.Fprintln(os.Stderr, "Error: Text is empty!")
 		os.Exit(1)
 	}
 	MarkovDictionary := make(map[string][]string)
@@ -33,4 +20,23 @@ func main() {
 		suffix := words[i+prefixLen]
 		MarkovDictionary[prefix] = append(MarkovDictionary[prefix], suffix)
 	}
+	fmt.Println(MarkovDictionary)
+}
+
+func HandleStdin() []string {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error: incorrect input")
+		os.Exit(1)
+	}
+
+	if fi.Mode()&os.ModeNamedPipe == 0 {
+		fmt.Fprintln(os.Stderr, "Error: no input text")
+		os.Exit(1)
+	}
+
+	buf := new(strings.Builder)
+	io.Copy(buf, os.Stdin)
+	input := buf.String()
+	return strings.Fields(input)
 }
