@@ -52,7 +52,7 @@ func main() {
 	if *startPrefix != "" {
 
 		if !ValidStartingPrefix(*startPrefix, MarkovDictionary, *prefixLen) {
-			fmt.Fprintln(os.Stderr, "Ошибка: Начальный префикс не найден в тексте")
+			fmt.Fprintln(os.Stderr, "Error: needed prefix is not found in text")
 			os.Exit(1)
 		}
 
