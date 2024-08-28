@@ -47,6 +47,10 @@ func main() {
 		MarkovDictionary[prefix] = append(MarkovDictionary[prefix], suffix)
 	}
 
+	if len(MarkovDictionary) == 0 {
+		fmt.Fprintln(os.Stderr, "Error: markov dictionary is empty")
+	}
+
 	var generatedText string
 
 	if *startPrefix != "" {
