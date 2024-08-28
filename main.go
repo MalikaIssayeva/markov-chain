@@ -104,8 +104,9 @@ func MarkovAlgorithm(MarkovDictionary map[string][]string, prefixLen int, length
 
 	sb.WriteString(prefix)
 	words := strings.Split(prefix, " ")
+	wordCount := len(words)
 
-	for i := 0; i < length; i++ {
+	for wordCount < length {
 		suffixes, exists := MarkovDictionary[prefix]
 		if !exists || len(suffixes) == 0 {
 			break
@@ -117,6 +118,8 @@ func MarkovAlgorithm(MarkovDictionary map[string][]string, prefixLen int, length
 
 		words = append(words[1:], suffix)
 		prefix = strings.Join(words, " ")
+
+		wordCount++
 	}
 
 	return sb.String()
