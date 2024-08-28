@@ -49,6 +49,7 @@ func main() {
 
 	if len(MarkovDictionary) == 0 {
 		fmt.Fprintln(os.Stderr, "Error: markov dictionary is empty")
+		os.Exit(1)
 	}
 
 	var generatedText string
