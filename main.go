@@ -41,10 +41,15 @@ func main() {
 
 	MarkovDictionary := make(map[string][]string)
 
+	var firstPrefix string
+
 	for i := 0; i < len(words)-*prefixLen; i++ {
 		prefix := strings.Join(words[i:i+*prefixLen], " ")
 		suffix := words[i+*prefixLen]
 		MarkovDictionary[prefix] = append(MarkovDictionary[prefix], suffix)
+		if i == 0 {
+			firstPrefix = prefix
+		}
 	}
 
 	if len(MarkovDictionary) == 0 {
@@ -55,16 +60,19 @@ func main() {
 	var generatedText string
 
 	if *startPrefix != "" {
-
-		if !ValidStartingPrefix(*startPrefix, MarkovDictionary, *prefixLen) {
+		if ValidStartingPrefix(*startPrefix, MarkovDictionary, *prefixLen) {
+			generatedText = MarkovAlgorithm(MarkovDictionary, *prefixLen, *wordCount, *startPrefix)
+		} else {
 			fmt.Fprintln(os.Stderr, "Error: needed prefix is not found in text")
 			os.Exit(1)
 		}
-
-		generatedText = MarkovAlgorithm(MarkovDictionary, *prefixLen, *wordCount, *startPrefix)
-
 	} else {
-		generatedText = MarkovAlgorithm(MarkovDictionary, *prefixLen, *wordCount, "")
+		if ValidStartingPrefix(firstPrefix, MarkovDictionary, *prefixLen) {
+			generatedText = MarkovAlgorithm(MarkovDictionary, *prefixLen, *wordCount, firstPrefix)
+		} else {
+			fmt.Fprintln(os.Stderr, "Error: the default starting prefix is invalid")
+			os.Exit(1)
+		}
 	}
 
 	fmt.Println(generatedText)
