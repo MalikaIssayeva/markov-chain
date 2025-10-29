@@ -1,101 +1,165 @@
-# markov chain
 
-### Baseline
+---
 
-By default your program must read from stdin the whole text and generate the text according to Markov Chain algorithm.
+# 🧠 Markov Chain Text Generator
 
-Outcomes:
+A **Go** program that generates realistic-sounding random text using a **Markov Chain** algorithm.
+This project focuses on **algorithms**, **I/O handling**, **file processing**, and **software design principles** — with special attention to **data structure design** and **performance**.
 
-- Program prints generated text according to the Markov Chain algorithm.
+---
 
-Notes:
+## 📚 Learning Objectives
 
-- Suffix length is ALWAYS 1 word.
-- Default prefix length is 2 words.
-- Default starting prefix is the first N words of the text, where N is the length of the prefix.
-- Default number of maximum words is 100.
+* Understand and implement the **Markov Chain** algorithm
+* Practice **input/output** and **file handling** in Go
+* Design efficient **data structures** for large-scale text processing
+* Apply **software design principles** (clarity, modularity, data-first thinking)
 
-Constraints:
+---
 
-- If any error print an error message indicating the reason.
-- The code should stop generating code after it printed maximum number of words or encountered the very last word in the text.
+## 🧩 Abstract
 
-Examples:
+This project implements a **text generator** that learns from a source text and produces new text that mimics its style. The algorithm analyses sequences of words (prefixes) and records which words typically follow them (suffixes). When generating text, it randomly selects suffixes based on these learned probabilities.
+
+This method simulates how predictive text systems work (like those on your phone keyboard). The algorithm uses a **Markov chain**, where the next state (word) depends only on the current state (prefix of previous words).
+
+---
+
+## ⚙️ Algorithm Overview
+
+The **Markov Chain algorithm** works as follows:
+
+1. Read all words from the input text.
+2. Create a mapping between **prefixes** (sequences of N words) and the list of **possible suffixes** that follow them.
+3. Start from an initial prefix and repeatedly:
+
+   * Randomly pick one of its suffixes,
+   * Print it,
+   * Slide the prefix window forward by one word.
+
+### Example
+
+Given the text:
+
+> Bad programmers worry about code. Good programmers worry about data-structures and their relationships.
+
+| Prefix                | Possible Suffixes      |
+| --------------------- | ---------------------- |
+| Bad programmers       | worry                  |
+| programmers worry     | about, about           |
+| worry about           | code., data-structures |
+| about code.           | Good                   |
+| Good programmers      | worry                  |
+| about data-structures | and                    |
+| data-structures and   | their                  |
+| and their             | relationships.         |
+
+Generated sequence:
+
+```
+Bad programmers worry about data-structures and their relationships.
+```
+
+---
+
+## 🧠 Design Decisions
+
+### Data Structure
+
+A **map** is used to efficiently store and retrieve prefix–suffix relationships:
+
+```go
+map[string][]string
+```
+
+* **Key:** A joined string of `prefixLength` words (the prefix)
+* **Value:** A list of all suffix words that followed this prefix in the input
+
+This allows:
+
+* O(1) lookups during text generation
+* Efficient appending of new suffixes
+* Flexibility for different prefix lengths
+
+---
+
+## 🏗️ Program Architecture
+
+The program runs in two main stages:
+
+1. **Build Stage** – Reads input, tokenizes it into words, constructs prefix→suffix mappings.
+2. **Generate Stage** – Randomly generates new text based on those mappings.
+
+---
+
+## 🧰 Installation and Compilation
+
+```bash
+$ go build -o markovchain .
+```
+
+This produces an executable named **`markovchain`** in the current directory.
+
+---
+
+## ▶️ Usage
+
+```bash
+markovchain [-w <N>] [-p <S>] [-l <N>]
+markovchain --help
+```
+
+### Options
+
+| Option   | Description                                | Constraints     |
+| -------- | ------------------------------------------ | --------------- |
+| `--help` | Show usage information                     | —               |
+| `-w N`   | Maximum number of words to generate        | `0 < N ≤ 10000` |
+| `-p S`   | Starting prefix (must exist in input text) | String of words |
+| `-l N`   | Prefix length                              | `1 ≤ N ≤ 5`     |
+
+---
+
+## 📥 Input and Output
+
+* **Input:** Entire text read from **stdin**
+* **Output:** Generated text printed to **stdout**
+
+### Examples
+
+#### 1️⃣ Default run
 
 ```bash
 $ cat the_great_gatsby.txt | ./markovchain | cat -e
-Chapter 1 In my younger and more stable, become for a job. He hadn't eat anything for a long, silent time. It was the sound of someone splashing after us over the confusion a long many-windowed room which overhung the terrace. Eluding Jordan's undergraduate who was well over sixty, and Maurice A. Flink and the great bursts of leaves growing on the air now. "How do you want? What do you like Europe?" she exclaimed surprisingly. "I just got here a minute. "Yes." He hesitated. "Was she killed?" "Yes." "I thought you didn't, if you'll pardon my--you see, I carry$
-```
-```bash
-$ cat the_great_gatsby.txt | ./markovchain | wc -w
-   100
-```
-```bash
-$ ./markovchain
-Error: no input text
+Chapter 1 In my younger and more stable, become for a job. He hadn't eat anything for a long, silent time. ...
 ```
 
-### Number of words
+* Default prefix length: `2`
+* Default maximum words: `100`
+* Default starting prefix: first two words of input
 
-Your program must be able to accept maximum number of words to be generated.
-
-Outcomes:
-
-- Program prints generated text according to the Markov Chain algorithm limited by the given maximum number of words.
-
-Constraints:
-
-- Given number can't be negative.
-- Given number can't be more 10,000.
-- If any error print an error message indicating the reason.
+#### 2️⃣ Limit number of words
 
 ```bash
-$ cat the_great_gatsby.txt | ./markovchain -w 10 | cat -e
-Chapter 1 In my younger and more stable, become for$
+$ cat the_great_gatsby.txt | ./markovchain -w 10
+Chapter 1 In my younger and more stable, become for
 ```
-### Prefix
 
-Your program must be able to accept the starting prefix.
-
-Outcomes:
-
-- Program prints generated text according to the Markov Chain algorithm that starts with the given prefix.
-
-Constraints:
-
-- Given prefix must be present in the original text.
-- If any error print an error message indicating the reason.
+#### 3️⃣ Custom starting prefix
 
 ```bash
-$ cat the_great_gatsby.txt | ./markovchain -w 10 -p "to play" | cat -e
-to play for you in that vast obscurity beyond the$
+$ cat the_great_gatsby.txt | ./markovchain -w 10 -p "to play"
+to play for you in that vast obscurity beyond the
 ```
-### Prefix length
 
-Your program must be able to accept the prefix length.
-
-Outcomes:
-
-- Program prints generated text according to the Markov Chain algorithm with the given prefix length.
-
-Constraints:
-
-- Given prefix length can't be negative.
-- Given prefix length can't be greater than 5.
-- If any error print an error message indicating the reason.
+#### 4️⃣ Custom prefix length
 
 ```bash
 $ cat the_great_gatsby.txt | ./markovchain -w 10 -p "to something funny" -l 3
 to something funny the last two days," remarked Wilson. "That's
 ```
 
-### Usage
-
-Your program must be able to print usage information.
-
-Outcomes:
-
-- Program prints usage text.
+#### 5️⃣ Help
 
 ```bash
 $ ./markovchain --help
@@ -111,3 +175,55 @@ Options:
   -p S    Starting prefix
   -l N    Prefix length
 ```
+
+#### 6️⃣ Error handling
+
+```bash
+$ ./markovchain
+Error: no input text
+```
+
+---
+
+## 🚦 Constraints & Validation
+
+| Case                  | Constraint     | Action                           |
+| --------------------- | -------------- | -------------------------------- |
+| No input text         | —              | Print `"Error: no input text"`   |
+| Negative word count   | `< 0`          | Print error                      |
+| Word count > 10,000   | —              | Print error                      |
+| Prefix not in text    | —              | Print error                      |
+| Invalid prefix length | `< 1` or `> 5` | Print error                      |
+| Runtime panic         | —              | Disqualifies program (grade = 0) |
+
+---
+
+## 🧾 Implementation Guidelines
+
+* Must compile successfully using:
+
+  ```bash
+  go build -o markovchain .
+  ```
+* Must **not** panic (handle all errors gracefully)
+* Must use **only built-in packages**
+* Must follow **gofumpt** formatting standards
+  (zero tolerance — non-compliant code = 0 grade)
+
+---
+
+## 🧠 Key Takeaways
+
+> "Bad programmers worry about code. Good programmers worry about data structures and their relationships."
+> — *Linus Torvalds*
+
+This project reinforces that **good software design** begins with **data modeling**, not just code writing. By thinking carefully about how data flows and interacts, the code naturally becomes more efficient, elegant, and maintainable.
+
+---
+
+## 📄 License
+
+This project is provided for educational purposes.
+All literary text used for training (e.g., *The Great Gatsby*) remains under its original copyright.
+
+---
